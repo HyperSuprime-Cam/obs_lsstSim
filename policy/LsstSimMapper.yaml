@@ -1,3 +1,4 @@
+camera: ../description/camera
 defects: ../description/defects
 
 needCalibRegistry: false
@@ -17,15 +18,11 @@ levels:
   - raft
   - sensor
   - channel
-
 defaultLevel: sensor
-
 defaultSubLevels:
   raft: sensor
   sensor: channel
   visit: sensor
-
-camera: ../description/camera
 
 # exposures and datasets which are needed for all of the mappers are defined
 # in the obs_base package (in either exposures.yaml or datasets.yaml).
@@ -34,6 +31,26 @@ camera: ../description/camera
 # appear below as a partial dataset definition.
 
 exposures:
+  raw:
+    template: raw/v%(visit)d-f%(filter)s/E%(snap)03d/R%(raft)s/S%(sensor)s/imsim_%(visit)d_R%(raft)s_S%(sensor)s_C%(channel)s_E%(snap)03d.fits.gz
+  eimage:
+    level: Ccd
+    persistable: DecoratedImageU
+    python: lsst.afw.image.DecoratedImageU
+    storage: FitsStorage
+    tables: raw
+    template: eimage/v%(visit)d-f%(filter)s/E%(snap)03d/R%(raft)s/eimage_%(visit)d_R%(raft)s_S%(sensor)s_E%(snap)03d.fits.gz
+  snapExp:
+    level: Ccd
+    persistable: ExposureF
+    python: lsst.afw.image.ExposureF
+    storage: FitsStorage
+    tables: raw
+    template: snapExp/v%(visit)d-f%(filter)s/s%(snap)d/R%(raft)s/S%(sensor)s.fits
+  postISRCCD:
+    template: postISRCCD/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
+  icExp:
+    template: icExp/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
   calexp:
     template: calexp/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
   calsnap:
@@ -43,26 +60,10 @@ exposures:
     storage: FitsStorage
     tables: raw
     template: calsnap/v%(visit)d-f%(filter)s/s%(snap)d/R%(raft)s/S%(sensor)s.fits
-  dcrModel:
-    level: None
-    persistable: ExposureF
-    python: lsst.afw.image.ExposureF
-    storage: FitsStorage
-    tables: raw
-    template: dcrModel/%(filter)s%(subfilter)s/%(tract)d/%(patch)s.fits
   deepCoadd_tempExp:
     template: deepCoadd/%(filter)s/%(tract)d/%(patch)stempExp/v%(visit)d-f%(filter)s.fits
-  deepDiff_differenceExp:
-    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/diffexp-S%(sensor)s.fits
-  deepDiff_matchedExp:
-    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/matchexp-S%(sensor)s.fits
-  eimage:
-    level: Ccd
-    persistable: DecoratedImageU
-    python: lsst.afw.image.DecoratedImageU
-    storage: FitsStorage
-    tables: raw
-    template: eimage/v%(visit)d-f%(filter)s/E%(snap)03d/R%(raft)s/eimage_%(visit)d_R%(raft)s_S%(sensor)s_E%(snap)03d.fits.gz
+  wcs:
+    template: wcs/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.wcs.fits
   fcr:
     level: Ccd
     persistable: ExposureI
@@ -72,21 +73,18 @@ exposures:
     - raw
     - raw_visit
     template: fcr/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fcr.fits
-  icExp:
-    template: icExp/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
-  postISRCCD:
-    template: postISRCCD/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
-  raw:
-    template: raw/v%(visit)d-f%(filter)s/E%(snap)03d/R%(raft)s/S%(sensor)s/imsim_%(visit)d_R%(raft)s_S%(sensor)s_C%(channel)s_E%(snap)03d.fits.gz
-  snapExp:
-    level: Ccd
+  dcrModel:
+    level: None
     persistable: ExposureF
     python: lsst.afw.image.ExposureF
     storage: FitsStorage
     tables: raw
-    template: snapExp/v%(visit)d-f%(filter)s/s%(snap)d/R%(raft)s/S%(sensor)s.fits
-  wcs:
-    template: wcs/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.wcs.fits
+    template: dcrModel/%(filter)s%(subfilter)s/%(tract)d/%(patch)s.fits
+  deepDiff_differenceExp:
+    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/diffexp-S%(sensor)s.fits
+  deepDiff_matchedExp:
+    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/matchexp-S%(sensor)s.fits
+
 
 calibrations:
   bias:
@@ -143,12 +141,6 @@ calibrations:
     template: fringe/v2-f%(filter)s/R%(raft)s/S%(sensor)s/imsim_2_R%(raft)s_S%(sensor)s_C%(channel)s.fits
 
 datasets:
-  Mosaic_metadata:
-    persistable: PropertySet
-    python: lsst.daf.base.PropertySet
-    storage: BoostStorage
-    tables: raw
-    template: metadata/Mosaic.boost
   ampExposureId:
     persistable: ignored
     python: lsst.daf.base.PropertySet
@@ -161,59 +153,45 @@ datasets:
     storage: ignored
     tables: raw
     template: ignored
-  calexpBackground:
-    template: calexp/v%(visit)d-f%(filter)s/R%(raft)s/bkgd-S%(sensor)s.fits
-  calibrate_metadata:
-    template: calibrate_metadata/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.boost
-  characterizeImage_metadata:
-    template: characterizeImage_metadata/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.boost
-  deepCoadd_forced_config:
-    template: config/deepCoadd_forced.py
-  deepCoadd_forced_metadata:
-    template: deepCoadd_forced_metadata/%(filter)s/%(tract)d/%(patch)s.boost
-  deepCoadd_forced_src:
-    template: deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/forced-%(filter)s-%(tract)d-%(patch)s.fits
-  deepCoadd_srcMatch:
-    template: deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/srcMatch-%(filter)s-%(tract)d-%(patch)s.fits
-  deepDiff_config:
-    python: lsst.pex.config.Config
-  deepDiff_diaSrc:
-    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/diaSrc-S%(sensor)s.fits
-  deepDiff_kernelSrc:
-    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/kernelSrc-S%(sensor)s.fits
-  deepDiff_metadata:
-    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/metadata-S%(sensor)s.boost
-  deep_measureMulti_config:
-    persistable: Config
-    python: lsst.meas.multifit.measureMulti.MeasureMultiConfig
-    storage: ConfigStorage
-    tables: raw
-    template: config/deep_measureMulti.py
-  deep_safeClipAssembleCoadd_metadata:
-    template: deep_safeClipAssembleCoadd_metadata/%(filter)s/%(tract)d/%(patch)s.boost
-  forcedPhotCcd_metadata:
-    template: forcedPhotCcd_metadata/tract%(tract)d/%(visit)d-%(sensor)s.boost
-  forced_src:
-    persistable: SourceCatalog
-    template: forced/%(tract)d/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
-  forced_src_schema:
-    template: schema/forced.fits
   icExpBackground:
     template: icExp/v%(visit)d-f%(filter)s/R%(raft)s/bkgd-S%(sensor)s.fits
+  calexpBackground:
+    template: calexp/v%(visit)d-f%(filter)s/R%(raft)s/bkgd-S%(sensor)s.fits
+  icSrc:
+    template: icSrc/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
   icMatch:
     persistable: BaseCatalog
     python: lsst.afw.table.BaseCatalog
     storage: FitsCatalogStorage
     tables: raw
     template: icMatch/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
-  icSrc:
-    template: icSrc/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
+  srcMatch:
+    template: srcMatch/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
+  forced_src:
+    persistable: SourceCatalog
+    template: forced/%(tract)d/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
+  forced_src_schema:
+    template: schema/forced.fits
+  forcedPhotCcd_metadata:
+    template: forcedPhotCcd_metadata/tract%(tract)d/%(visit)d-%(sensor)s.boost
+  src:
+    template: src/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
+  Mosaic_metadata:
+    persistable: PropertySet
+    python: lsst.daf.base.PropertySet
+    storage: BoostStorage
+    tables: raw
+    template: metadata/Mosaic.boost
+  processCcd_metadata:
+    template: processCcd_metadata/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.boost
   isr_config:
     python: lsst.obs.lsstSim.LsstSimIsrConfig
   isr_metadata:
     template: isr_metadata/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.boost
-  processCcd_metadata:
-    template: processCcd_metadata/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.boost
+  characterizeImage_metadata:
+    template: characterizeImage_metadata/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.boost
+  calibrate_metadata:
+    template: calibrate_metadata/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.boost
   processEimage_config:
     persistable: Config
     python: lsst.obs.lsstSim.processEimage.ProcessEimageConfig
@@ -226,8 +204,28 @@ datasets:
     storage: BoostStorage
     tables: raw
     template: processEimage_metadata/v%(visit)d-f%(filter)s/s%(snap)i/R%(raft)s/S%(sensor)s.boost
-  src:
-    template: src/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
-  srcMatch:
-    template: srcMatch/v%(visit)d-f%(filter)s/R%(raft)s/S%(sensor)s.fits
+  deep_measureMulti_config:
+    persistable: Config
+    python: lsst.meas.multifit.measureMulti.MeasureMultiConfig
+    storage: ConfigStorage
+    tables: raw
+    template: config/deep_measureMulti.py
+  deep_safeClipAssembleCoadd_metadata:
+    template: deep_safeClipAssembleCoadd_metadata/%(filter)s/%(tract)d/%(patch)s.boost
+  deepCoadd_srcMatch:
+    template: deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/srcMatch-%(filter)s-%(tract)d-%(patch)s.fits
+  deepCoadd_forced_src:
+    template: deepCoadd-results/%(filter)s/%(tract)d/%(patch)s/forced-%(filter)s-%(tract)d-%(patch)s.fits
+  deepCoadd_forced_config:
+    template: config/deepCoadd_forced.py
+  deepCoadd_forced_metadata:
+    template: deepCoadd_forced_metadata/%(filter)s/%(tract)d/%(patch)s.boost
+  deepDiff_diaSrc:
+    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/diaSrc-S%(sensor)s.fits
+  deepDiff_kernelSrc:
+    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/kernelSrc-S%(sensor)s.fits
+  deepDiff_config:
+    python: lsst.pex.config.Config
+  deepDiff_metadata:
+    template: deepDiff/v%(visit)d-f%(filter)s/R%(raft)s/metadata-S%(sensor)s.boost
 
